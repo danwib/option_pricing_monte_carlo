@@ -4,7 +4,7 @@ from math import exp, log, sqrt, erf
 import numpy as np
 from time import perf_counter
 import matplotlib.pyplot as plt
-
+import os
 
 def norm_cdf(x: float) -> float:
     # Standard normal CDF via erf (no SciPy needed)
@@ -107,6 +107,9 @@ def convergence_plot(S0, K, r, sigma, T, seed, method, path_grid, out_png):
     plt.title("European Call — Monte Carlo Convergence")
     plt.legend()
     plt.tight_layout()
+    out_dir = os.path.dirname(out_png)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
     plt.savefig(out_png, dpi=150)
     plt.close()
     return {"bs_price": bs_price, "points": estimates, "out_png": out_png}
