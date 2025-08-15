@@ -189,6 +189,9 @@ def convergence_plot_multi(
 
     return {"bs_price": bs_price, "points": all_points, "out_png": out_png}
 
+def convergence_plot(S0,K,r,sigma,T,seed,method,path_grid,out_png):
+    return convergence_plot_multi(S0,K,r,sigma,T,seed,[method],path_grid,out_png)
+
 
 # ----------------------------
 # CLI
