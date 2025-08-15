@@ -1,4 +1,7 @@
 # monte_carlo.py
+import matplotlib
+
+matplotlib.use("Agg")
 import argparse
 import json
 import os
@@ -18,7 +21,9 @@ def norm_cdf(x: float) -> float:
     return 0.5 * (1.0 + erf(x / sqrt(2.0)))
 
 
-def bs_call_price_delta(S0: float, K: float, r: float, sigma: float, T: float) -> Tuple[float, float]:
+def bs_call_price_delta(
+    S0: float, K: float, r: float, sigma: float, T: float
+) -> Tuple[float, float]:
     """Black–Scholes price and Delta for a European call."""
     if any(v <= 0 for v in (S0, K, sigma, T)):
         raise ValueError("S0, K, sigma, T must be positive")
@@ -127,7 +132,14 @@ def euro_call_mc(
 
 
 def delta_fd(
-    S0: float, K: float, r: float, sigma: float, T: float, n: int = 100_000, seed: int = 0, eps: float = 1e-2
+    S0: float,
+    K: float,
+    r: float,
+    sigma: float,
+    T: float,
+    n: int = 100_000,
+    seed: int = 0,
+    eps: float = 1e-2,
 ) -> float:
     """Finite-difference Delta (central) using the MC price as a function of S0."""
     up = euro_call_mc(S0 + eps, K, r, sigma, T, n=n, seed=seed, method="antithetic")["price"]
@@ -189,8 +201,9 @@ def convergence_plot_multi(
 
     return {"bs_price": bs_price, "points": all_points, "out_png": out_png}
 
-def convergence_plot(S0,K,r,sigma,T,seed,method,path_grid,out_png):
-    return convergence_plot_multi(S0,K,r,sigma,T,seed,[method],path_grid,out_png)
+
+def convergence_plot(S0, K, r, sigma, T, seed, method, path_grid, out_png):
+    return convergence_plot_multi(S0, K, r, sigma, T, seed, [method], path_grid, out_png)
 
 
 # ----------------------------
@@ -239,7 +252,9 @@ def main() -> None:
     latency_std = float(np.std(latencies, ddof=1)) if len(latencies) > 1 else 0.0
     last_res["latency_sec"] = round(latency_mean, 6)
     last_res["latency_std_sec"] = round(latency_std, 6)
-    last_res["throughput_paths_per_sec"] = int(args.paths / latency_mean) if latency_mean > 0 else None
+    last_res["throughput_paths_per_sec"] = (
+        int(args.paths / latency_mean) if latency_mean > 0 else None
+    )
 
     # Reference BS and absolute error
     bs_price, _ = bs_call_price_delta(args.S0, args.K, args.r, args.sigma, args.T)
@@ -256,7 +271,9 @@ def main() -> None:
     if args.plot:
         grid = [1_000, 5_000, 10_000, 20_000, 50_000, max(100_000, args.paths)]
         methods = [m.strip() for m in args.plot_methods.split(",") if m.strip()]
-        conv = convergence_plot_multi(args.S0, args.K, args.r, args.sigma, args.T, args.seed, methods, grid, args.plot)
+        conv = convergence_plot_multi(
+            args.S0, args.K, args.r, args.sigma, args.T, args.seed, methods, grid, args.plot
+        )
         last_res["convergence_png"] = conv["out_png"]
 
     # Stable single JSON object for easy parsing/CI
